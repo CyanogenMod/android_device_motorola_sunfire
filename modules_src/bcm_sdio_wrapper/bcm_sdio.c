@@ -52,6 +52,8 @@ int BCM_SDIO_FN0_BLK_SIZE ;
 int debuglevel = 0;
 int g_irq_num = -1;
 
+#define ERROR_LEVEL 1
+
 struct bcmsdio_data {
 	struct sdio_func *func;
 	void *wimax_data;
@@ -115,7 +117,7 @@ static int bcmsdio_probe(struct sdio_func *func, const struct sdio_device_id *id
 
 	ret = probe_notifier(func->num, &data->wimax_data,func->vendor, func->device);
 	if (ret < 0) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT "Probe notifier failed\n");
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT "Probe notifier failed\n");
 		goto free_data;
 	}
 	return 0;
@@ -300,13 +302,14 @@ int bcmsdio_cmd52(unsigned int data, unsigned addr, unsigned rw, unsigned func,i
 	*perrval = 0;
 	
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ** NULL FUNC PTR: x%x\n", func);
-		return -1;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ** NULL FUNC PTR: x%x\n", func);
+		return -ENON_INTF_ERR;
 	}
 
 	sdio_claim_host(function);
 	if(func_data[BCM_SDIO_FN1]->bremoved) {
-		ret = -1;
+		ret = -ENON_INTF_ERR;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT "Error: bremoved is non zero :%d", func_data[BCM_SDIO_FN1]->bremoved);
 		goto rel_host;
 	}
 
@@ -351,12 +354,13 @@ int bcmsdio_cmd52_nolock(unsigned int data, unsigned addr, unsigned rw, unsigned
 	*perrval = 0;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ** NULL FUNC PTR: x%x\n", func);
-		return -1;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ** NULL FUNC PTR: x%x\n", func);
+		return -ENON_INTF_ERR;
 	}
 
 	if(func_data[BCM_SDIO_FN1]->bremoved) {
-		return -1;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT "Error: bremoved is non zero :%d", func_data[BCM_SDIO_FN1]->bremoved);
+		return -ENON_INTF_ERR;
 	}
 
 	while ( count < SDIO_CMD_RETRIES )
@@ -399,13 +403,14 @@ int bcmsdio_cmd53(unsigned int offset, int rw, int func, int blk_mode, int opcod
 	int count = 0;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
-		return -1;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		return -ENON_INTF_ERR;
 	}
 
 	sdio_claim_host(function);
 	if(func_data[BCM_SDIO_FN1]->bremoved) {
-		ret = -1;
+		ret = -ENON_INTF_ERR;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT "Error :%s,%d removed flag var is non-zero :%d \n", __func__, __LINE__,func_data[BCM_SDIO_FN1]->bremoved);
 		goto rel_host;
 	}
 
@@ -481,8 +486,8 @@ int bcmsdio_set_blk_size(int func, unsigned int blk_size)
 	int ret = 0;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
-		return -1;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		return -ENON_INTF_ERR;
 	}
 
 	sdio_claim_host(function);
@@ -518,8 +523,8 @@ int bcmsdio_register_intr_handler(int func, sdio_irq_handler_t * handler)
 	int ret;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
-		return -1;
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		return -ENON_INTF_ERR;
 	}
 
 	sdio_claim_host(function);
@@ -540,7 +545,7 @@ void bcmsdio_unregister_intr_handler(int func)
 	struct sdio_func *function = func_data[func]->func;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
 		return;
 	}
 
@@ -572,7 +577,7 @@ void bcmsdio_enable_func(int func, int benable)
 	struct sdio_func *function = func_data[func]->func;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
 		return;
 	}
 
@@ -596,7 +601,7 @@ void bcmsdio_claim_host(int func)
 	struct sdio_func *function = func_data[BCM_SDIO_FN1]->func;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
 	} else {
 		sdio_claim_host(function);
 	}
@@ -609,7 +614,7 @@ void bcmsdio_release_host(int func)
 	struct sdio_func *function = func_data[BCM_SDIO_FN1]->func;
 
 	if (function == NULL) {
-		BCM_DEBUG_PRINT(debuglevel, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
+		BCM_DEBUG_PRINT(ERROR_LEVEL, KERN_ALERT " ***Error: %s %d ***\n", __func__, __LINE__);
 	} else {
 		sdio_release_host(function);
 	}

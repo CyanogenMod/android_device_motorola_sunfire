@@ -65,6 +65,7 @@ PRODUCT_PACKAGES += \
 	FM \
 	DockAudio \
 	Torch
+#        SunfireParts \
 
 DEVICE_PACKAGE_OVERLAYS += device/motorola/sunfire/overlay
 

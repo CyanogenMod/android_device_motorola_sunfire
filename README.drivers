@@ -1,12 +1,13 @@
+Quick tips on how to compile the drivers in modules_src
+
+This is dependant on a completely set up environment
 
 #vpndriver.ko:
 make -j1 -C $KERNEL_SRC O=$KERNEL_BUILD_OUT DEPMOD=$PLATFORM_DIR/out/host/linux-x86/bin/depmod INSTALL_MOD_PATH=$KERNEL_BUILD_OUT M=$PLATFORM_DIR/device/motorola/sunfire/modules_src/vpndriver modules 
 
+WARNING: the following command is dependant on some values of your kernel
 #DHD.ko:
- make -C /Depot/devel/android/cm/device/motorola/sunfire/modules_src/dhd_from_moto_sourceforge/src/dhd/linux ANDROID_BUILD_TOP=$PLATFORM_DIR LINUXVER=2.6.32.9 -I/Depot/devel/android/cm/kernel/tegra O=$KERNEL_BUILD_OUT DEPMOD=$PLATFORM_DIR/out/host/linux-x86/bin/depmod
+make -C /Depot/devel/android/cm7/device/motorola/sunfire/modules_src/dhd/src/dhd/linux ANDROID_BUILD_TOP=$PLATFORM_DIR LINUXVER=2.6.32.56 -I/Depot/devel/android/cmkernel/kernel-MB860 O=$KERNEL_BUILD_OUT DEPMOD=$PLATFORM_DIR/out/host/linux-x86/bin/depmod
 
 #bcmsdio.ko:
 make -j1 -C $KERNEL_SRC O=$KERNEL_BUILD_OUT DEPMOD=$PLATFORM_DIR/out/host/linux-x86/bin/depmod INSTALL_MOD_PATH=$KERNEL_BUILD_OUT M=$PLATFORM_DIR/device/motorola/sunfire/modules_src/bcm_sdio_wrapper modules
-
-
-/Depot/devel/android/cm/kernel/broadcom/src/dhd/linux

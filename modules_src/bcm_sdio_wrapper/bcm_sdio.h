@@ -29,6 +29,8 @@ typedef int (*bcmwimax_platform_init) (void);
 
 typedef int (*bcmwimax_platform_deinit) (void);
 
+#define ENON_INTF_ERR 0x73FE15
+
 /* ************************************************************************* */
 /* bcmsdio_reg_driver: To register a module/driver to this SDIO wrapper 
  * driver. At max one driver can be registered at any point of time.
